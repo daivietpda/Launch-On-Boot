@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Launch on Boot</string>
-    <string name="credits">This app lets users configure a specific app to launch whenever the device is rebooted.\n\nCreated by the Interactive Tv Lab.\nOpen sourced on GitHub.</string>
+    <string name="credits">This app lets users configure a specific app to launch whenever the device is rebooted.\n\nCreated by the Interactive Tv Lab.\nOpen sourced on GitHub.\nUpdated by DaivietPDA</string>
     <string name="null_intent">Cannot find activity to launch</string>
     <string name="onboarding_title_welcome">Welcome to \"Launch on Boot\"</string>
     <string name="onboarding_description_welcome">This short guide will help you get started.</string>

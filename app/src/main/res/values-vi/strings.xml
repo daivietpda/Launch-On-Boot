@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Khởi chạy khi Khởi động</string>
-    <string name="credits">Ứng dụng này cho phép người dùng cấu hình một ứng dụng cụ thể để khởi chạy bất cứ khi nào thiết bị được khởi động lại.\n\nĐược tạo bởi Interactive Tv Lab.\nMã nguồn mở trên GitHub.</string>
+    <string name="credits">Ứng dụng này cho phép người dùng cấu hình một ứng dụng cụ thể để khởi chạy bất cứ khi nào thiết bị được khởi động lại.\n\nĐược tạo bởi Interactive Tv Lab.\nMã nguồn mở trên GitHub.\nCật nhật ứng dụng bởi DaivietPDA</string>
     <string name="null_intent">Không tìm thấy hoạt động để khởi chạy</string>
     <string name="onboarding_title_welcome">Chào mừng bạn đến với \"Khởi chạy khi Khởi động\"</string>
     <string name="onboarding_description_welcome">Hướng dẫn ngắn này sẽ giúp bạn bắt đầu.</string>
