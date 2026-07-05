@@ -52,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
         mSettingsManager = new SettingsManager(this);
         if (!mSettingsManager.getBoolean(ONBOARDING)) {
             startActivity(new Intent(this, OnboardingActivity.class));
+            finish();
+            return;
         }
     }
 
@@ -118,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
                             updateSelectionView();
                             if (isChecked) {
                                 startForegroundService();
+                            } else {
+                                stopForegroundService();
                             }
                         }
                     });
@@ -318,8 +322,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startForegroundService() {
-        // Ideally only starts once :thinking-emoji:
         Intent i = new Intent(MainActivity.this, DreamListenerService.class);
         ContextCompat.startForegroundService(this, i);
+    }
+
+    private void stopForegroundService() {
+        Intent i = new Intent(MainActivity.this, DreamListenerService.class);
+        stopService(i);
     }
 }
