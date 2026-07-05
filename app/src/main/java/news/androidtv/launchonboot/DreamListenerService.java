@@ -1,16 +1,20 @@
 package news.androidtv.launchonboot;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ServiceInfo;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 /**
@@ -22,6 +26,7 @@ public class DreamListenerService extends Service {
     private static final String TAG = DreamListenerService.class.getSimpleName();
 
     private static final int ONGOING_NOTIFICATION_ID = 1;
+    private static final String CHANNEL_ID = "dream_listener_channel";
 
     private BroadcastReceiver dreamHandler = new BroadcastReceiver() {
         @Override
@@ -42,10 +47,18 @@ public class DreamListenerService extends Service {
     public void onCreate() {
         super.onCreate();
         // Create a foreground service.
+        createNotificationChannel();
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
-        Notification notification = new Notification.Builder(this)
+        Notification.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder = new Notification.Builder(this, CHANNEL_ID);
+        } else {
+            builder = new Notification.Builder(this);
+        }
+
+        Notification notification = builder
                 .setContentTitle(getText(R.string.app_name))
                 .setContentText(getText(R.string.notification_text))
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -55,12 +68,30 @@ public class DreamListenerService extends Service {
                 .setPriority(Notification.PRIORITY_MIN)
                 .build();
 
-        startForeground(ONGOING_NOTIFICATION_ID, notification);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(ONGOING_NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
+        } else {
+            startForeground(ONGOING_NOTIFICATION_ID, notification);
+        }
         Log.d(TAG, "Deploy notification");
 
         // Register listeners.
         IntentFilter filter = new IntentFilter(Intent.ACTION_DREAMING_STOPPED);
         registerReceiver(dreamHandler, filter);
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.app_name);
+            String description = getString(R.string.notification_text);
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     @Override

@@ -46,7 +46,7 @@
             android:layout_height="wrap_content" />
         <TextView
             android:layout_width="wrap_content"
-            android:text="Enabled"
+            android:text="@string/label_enabled"
             android:layout_toRightOf="@id/switch_enable"
             android:layout_marginTop="4dp"
             android:layout_marginLeft="16dp"
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content" />
         <TextView
             android:layout_width="wrap_content"
-            android:text="Launch Tv App on Boot?"
+            android:text="@string/label_launch_tv_app"
             android:layout_toRightOf="@id/switch_live_channels"
             android:layout_below="@id/switch_enable"
             android:layout_marginTop="12dp"
@@ -85,7 +85,7 @@
             android:layout_below="@id/switch_wakeup"
             android:layout_marginTop="16dp"
             android:background="@color/colorPrimaryDark"
-            android:text="Select app"
+            android:text="@string/label_select_app"
             android:layout_height="wrap_content" />
         <TextView
             android:layout_width="wrap_content"
@@ -94,13 +94,53 @@
             android:layout_marginTop="8dp"
             android:layout_below="@id/button_select_app"
             android:layout_height="wrap_content" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/delay_container"
+            android:layout_below="@id/text_package_name"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/launch_delay_label"/>
+            <EditText
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/edit_delay"
+                android:inputType="number"
+                android:text="0"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
         <Button
             android:layout_width="wrap_content"
-            android:text="Test"
+            android:text="@string/label_test"
             android:id="@+id/button_test"
             android:background="@color/colorPrimaryDark"
-            android:layout_below="@id/text_package_name"
-            android:layout_marginTop="64dp"
+            android:layout_below="@id/delay_container"
+            android:layout_marginTop="32dp"
             android:layout_height="wrap_content" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/button_test"
+            android:layout_marginTop="32dp"
+            android:text="@string/msg_accessibility_required"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:alpha="0.7"
+            android:id="@+id/text_accessibility_info"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/text_accessibility_info"
+            android:text="@string/label_go_to_settings"
+            android:id="@+id/button_go_to_accessibility"
+            android:layout_marginTop="16dp"
+            android:background="@color/colorPrimaryDark"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"/>
     </RelativeLayout>
 </RelativeLayout>

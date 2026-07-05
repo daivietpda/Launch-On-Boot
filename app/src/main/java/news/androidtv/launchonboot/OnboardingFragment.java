@@ -9,7 +9,7 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
  * Created by Nick on 4/22/2017.
  */
 
-public class OnboardingFragment extends android.support.v17.leanback.app.OnboardingFragment {
+public class OnboardingFragment extends androidx.leanback.app.OnboardingFragment {
     private static final int[] pageTitles = {
             R.string.onboarding_title_welcome,
             R.string.onboarding_title_what,

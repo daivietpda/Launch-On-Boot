@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Khởi chạy khi Khởi động</string>
+    <string name="credits">Ứng dụng này cho phép người dùng cấu hình một ứng dụng cụ thể để khởi chạy bất cứ khi nào thiết bị được khởi động lại.\n\nĐược tạo bởi Interactive Tv Lab.\nMã nguồn mở trên GitHub.</string>
+    <string name="null_intent">Không tìm thấy hoạt động để khởi chạy</string>
+    <string name="onboarding_title_welcome">Chào mừng bạn đến với \"Khởi chạy khi Khởi động\"</string>
+    <string name="onboarding_description_welcome">Hướng dẫn ngắn này sẽ giúp bạn bắt đầu.</string>
+    <string name="onboarding_title_what">Cách thức hoạt động</string>
+    <string name="onboarding_description_what">Khi bạn bật thiết bị, bạn có thể truy cập trình khởi chạy hoặc mở ngay ứng dụng bạn muốn.</string>
+    <string name="onboarding_title_tv">Kênh truyền hình trực tiếp</string>
+    <string name="onboarding_description_tv">Nó có thể được cấu hình để mở bất kỳ ứng dụng nào, bao gồm cả việc phát Live TV ngay lập tức</string>
+    <string name="onboarding_title_try">Thử ngay!</string>
+    <string name="onboarding_description_try">Rất dễ dàng để bắt đầu. Và bạn có thể tắt nó bất cứ lúc nào.</string>
+    <string name="notification_text">Đang chờ sự kiện</string>
+    <string name="msg_wakeup">Khởi chạy khi thiết bị thức dậy?</string>
+    <string name="accessibility_description">Hỗ trợ tự động khởi động ứng dụng trên Android 10+.</string>
+    <string name="msg_accessibility_required">Để đảm bảo hoạt động tin cậy trên Android 10+, vui lòng bật Dịch vụ Hỗ trợ tiếp cận cho ứng dụng này trong Cài đặt.</string>
+    <string name="label_go_to_settings">Đi đến Cài đặt</string>
+    <string name="launch_delay_label">Độ trễ khởi chạy (giây):</string>
+    <string name="label_enabled">Đã bật</string>
+    <string name="label_launch_tv_app">Khởi chạy ứng dụng TV khi khởi động?</string>
+    <string name="label_select_app">Chọn ứng dụng</string>
+    <string name="label_test">Kiểm tra</string>
+    <string name="dialog_select_app_title">Chọn một ứng dụng</string>
+</resources>

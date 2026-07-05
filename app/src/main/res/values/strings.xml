@@ -12,4 +12,13 @@
     <string name="onboarding_description_try">It\'s easy to get started. And you can turn it off at any time.</string>
     <string name="notification_text">Waiting for events</string>
     <string name="msg_wakeup">Launch when device wakes up?</string>
+    <string name="accessibility_description">Support auto-starting apps on Android 10+.</string>
+    <string name="msg_accessibility_required">To ensure reliable operation on Android 10+, please enable the Accessibility Service for this app in Settings.</string>
+    <string name="label_go_to_settings">Go to Settings</string>
+    <string name="launch_delay_label">Delay launch (seconds):</string>
+    <string name="label_enabled">Enabled</string>
+    <string name="label_launch_tv_app">Launch Tv App on Boot?</string>
+    <string name="label_select_app">Select app</string>
+    <string name="label_test">Test</string>
+    <string name="dialog_select_app_title">Select an app</string>
 </resources>
