@@ -8,6 +8,10 @@
      alt="Get it on Google Play"
      height="80">](https://play.google.com/store/apps/details?id=news.androidtv.launchonboot)
 
+## Download APK
+You can download the latest version of the app directly from the [GitHub Releases](https://github.com/daivietpda/Launch-On-Boot/releases) page or use the pre-built APK in the repository:
+* [Launch-On-Boot.apk](Launch-On-Boot.apk)
+
 # Launch-On-Boot
 _Launches a TV app when the device boots_
 
