@@ -10,4 +10,5 @@ public class SettingsManagerConstants {
     public static final String LAUNCH_ACTIVITY = "LAUNCH_ACTIVITY";
     public static final String ON_WAKEUP = "ON_WAKEUP";
     public static final String ONBOARDING = "ONBOARDING";
+    public static final String SHOW_ALL_APPS = "SHOW_ALL_APPS";
 }

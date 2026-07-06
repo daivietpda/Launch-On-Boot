@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private Switch mSwitchEnabled;
     private Switch mSwitchLiveChannels;
     private Switch mSwitchWakeup;
+    private Switch mSwitchShowAll;
+    private TextView mTextShowAll;
     private Button mButtonSelectApp;
     private TextView mPackageName;
     private List<ResolveInfo> launcherApplications;
@@ -79,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
         mSwitchLiveChannels = ((Switch) findViewById(R.id.switch_live_channels));
         mSwitchEnabled = ((Switch) findViewById(R.id.switch_enable));
         mSwitchWakeup = ((Switch) findViewById(R.id.switch_wakeup));
+        mSwitchShowAll = ((Switch) findViewById(R.id.switch_show_all));
+        mTextShowAll = ((TextView) findViewById(R.id.text_show_all));
         mButtonSelectApp = (Button) findViewById(R.id.button_select_app);
         mPackageName = ((TextView) findViewById(R.id.text_package_name));
 
@@ -88,6 +92,10 @@ public class MainActivity extends AppCompatActivity {
                 mSettingsManager.getBoolean(SettingsManagerConstants.LAUNCH_LIVE_CHANNELS));
         mSwitchWakeup.setChecked(
                 mSettingsManager.getBoolean(SettingsManagerConstants.ON_WAKEUP));
+        if (mSwitchShowAll != null) {
+            mSwitchShowAll.setChecked(
+                    mSettingsManager.getBoolean(SettingsManagerConstants.SHOW_ALL_APPS));
+        }
         mPackageName
                 .setText(_mPackageText());
         updateSelectionView();
@@ -122,6 +130,18 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+        if (mSwitchShowAll != null) {
+            mSwitchShowAll.setOnCheckedChangeListener
+                    (new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                            mSettingsManager.setBoolean(
+                                    SettingsManagerConstants.SHOW_ALL_APPS, isChecked);
+                            launcherApplications = getLauncherApps();
+                        }
+                    });
+        }
+
         if (!getResources().getBoolean(R.bool.DEBUG_FLAG_TEST_BUTTON)) {
             findViewById(R.id.button_test).setVisibility(GONE);
         }
@@ -134,9 +154,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mButtonSelectApp.setOnClickListener(new View.OnClickListener() {
-            AppListItem[] appListItems = getAppList();
             @Override
             public void onClick(View v) {
+                final AppListItem[] appListItems = getAppList();
                 ListAdapter adapter = new ArrayAdapter<AppListItem>(MainActivity.this,
                         android.R.layout.select_dialog_item,
                         android.R.id.text1,
@@ -200,6 +220,28 @@ public class MainActivity extends AppCompatActivity {
         if (mSettingsManager.getBoolean(SettingsManagerConstants.ON_WAKEUP)) {
             startForegroundService();
         }
+
+        View.OnClickListener accessibilityListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Settings.ACTION_SETTINGS);
+                startActivity(intent);
+            }
+        };
+
+        if (findViewById(R.id.text_go_to_accessibility) != null) {
+            findViewById(R.id.text_go_to_accessibility).setOnClickListener(accessibilityListener);
+        }
+        if (findViewById(R.id.button_go_to_accessibility) != null) {
+            findViewById(R.id.button_go_to_accessibility).setOnClickListener(accessibilityListener);
+            findViewById(R.id.button_go_to_accessibility).setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    v.setBackgroundColor(hasFocus ? getResources().getColor(R.color.colorAccent) :
+                            getResources().getColor(R.color.colorPrimaryDark));
+                }
+            });
+        }
     }
 
     public AppListItem[] getAppList()
@@ -231,30 +273,34 @@ public class MainActivity extends AppCompatActivity {
 
     public List<ResolveInfo> getLauncherApps() {
         final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        List<ResolveInfo> installedApplications;
         // Change which category is used based on form factor.
+        if (mSettingsManager != null && mSettingsManager.getBoolean(SettingsManagerConstants.SHOW_ALL_APPS)) {
+            installedApplications = getPackageManager().queryIntentActivities(mainIntent, 0);
+        } else {
+            mainIntent.addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
+            final List<ResolveInfo> installedApplicationstv = getPackageManager().queryIntentActivities(mainIntent, 0);
 
-        mainIntent.addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
-        final List<ResolveInfo> installedApplicationstv = getPackageManager().queryIntentActivities(mainIntent, 0);
+            mainIntent.removeCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
+            mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            installedApplications = getPackageManager().queryIntentActivities(mainIntent, 0);
 
-        mainIntent.removeCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        final List<ResolveInfo> installedApplications = getPackageManager().queryIntentActivities(mainIntent, 0);
-
-        boolean isPresent = false;
-        for (int i = 0; i < installedApplicationstv.size(); i++) {
-            isPresent = false;
-            for (int j = 0; j < installedApplications.size(); j++) {
-                if (installedApplicationstv.get(i).activityInfo.packageName.equals(installedApplications.get(j).activityInfo.packageName)) {
-                    isPresent = true;
-                    break;
+            boolean isPresent = false;
+            for (int i = 0; i < installedApplicationstv.size(); i++) {
+                isPresent = false;
+                for (int j = 0; j < installedApplications.size(); j++) {
+                    if (installedApplicationstv.get(i).activityInfo.packageName.equals(installedApplications.get(j).activityInfo.packageName)) {
+                        isPresent = true;
+                        break;
+                    }
                 }
-            }
-            if (!isPresent) {
-                installedApplications.add(installedApplicationstv.get(i));
+                if (!isPresent) {
+                    installedApplications.add(installedApplicationstv.get(i));
+                }
             }
         }
 
-         Collections.sort(installedApplications,
+        Collections.sort(installedApplications,
                 new Comparator<ResolveInfo>()
                 {
                     public int compare(ResolveInfo f1, ResolveInfo f2)
@@ -289,13 +335,31 @@ public class MainActivity extends AppCompatActivity {
             if (mSwitchLiveChannels.isChecked()) {
                 mButtonSelectApp.setVisibility(GONE);
                 mPackageName.setVisibility(GONE);
+                if (mSwitchShowAll != null) {
+                    mSwitchShowAll.setVisibility(GONE);
+                }
+                if (mTextShowAll != null) {
+                    mTextShowAll.setVisibility(GONE);
+                }
             } else {
                 mButtonSelectApp.setVisibility(View.VISIBLE);
                 mPackageName.setVisibility(View.VISIBLE);
+                if (mSwitchShowAll != null) {
+                    mSwitchShowAll.setVisibility(View.VISIBLE);
+                }
+                if (mTextShowAll != null) {
+                    mTextShowAll.setVisibility(View.VISIBLE);
+                }
             }
         } else {
             mButtonSelectApp.setVisibility(GONE);
             mPackageName.setVisibility(GONE);
+            if (mSwitchShowAll != null) {
+                mSwitchShowAll.setVisibility(GONE);
+            }
+            if (mTextShowAll != null) {
+                mTextShowAll.setVisibility(GONE);
+            }
             mSwitchLiveChannels.setEnabled(false);
             findViewById(R.id.button_test).setEnabled(false);
         }

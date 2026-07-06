@@ -19,4 +19,6 @@
     <string name="button_test">Test</string>
     <string name="switch_show_all">Show all apps</string>
     <string name="switch_mute">Mute device?</string>
+    <string name="msg_accessibility_required">To ensure reliable operation on Android 10+, please enable the Accessibility Service for this app in Settings.</string>
+    <string name="label_go_to_settings">Go to Settings</string>
 </resources>
