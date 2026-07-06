@@ -355,8 +355,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void addOverlay() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !Settings.canDrawOverlays(this)) {
-                Intent i = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+            Intent i = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+            try {
                 startActivityForResult(i, 4711);
+            } catch (android.content.ActivityNotFoundException e) {
+                // Some devices don't support the direct link to the app's overlay settings.
+                // Fall back to the general overlay settings.
+                Intent fallbackIntent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                startActivityForResult(fallbackIntent, 4711);
+            }
         }
     }
 }
