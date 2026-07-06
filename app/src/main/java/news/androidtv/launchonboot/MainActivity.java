@@ -220,28 +220,6 @@ public class MainActivity extends AppCompatActivity {
         if (mSettingsManager.getBoolean(SettingsManagerConstants.ON_WAKEUP)) {
             startForegroundService();
         }
-
-        View.OnClickListener accessibilityListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Settings.ACTION_SETTINGS);
-                startActivity(intent);
-            }
-        };
-
-        if (findViewById(R.id.text_go_to_accessibility) != null) {
-            findViewById(R.id.text_go_to_accessibility).setOnClickListener(accessibilityListener);
-        }
-        if (findViewById(R.id.button_go_to_accessibility) != null) {
-            findViewById(R.id.button_go_to_accessibility).setOnClickListener(accessibilityListener);
-            findViewById(R.id.button_go_to_accessibility).setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    v.setBackgroundColor(hasFocus ? getResources().getColor(R.color.colorAccent) :
-                            getResources().getColor(R.color.colorPrimaryDark));
-                }
-            });
-        }
     }
 
     public AppListItem[] getAppList()
