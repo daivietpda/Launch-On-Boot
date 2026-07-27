@@ -6,7 +6,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private Button mButtonSelectApp;
     private TextView mPackageName;
     private List<ResolveInfo> launcherApplications;
+    private boolean overlayPermissionRequestAttempted;
 
     public static class AppListItem{
         public final String name;
@@ -100,6 +103,9 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mSettingsManager.setBoolean(
                         SettingsManagerConstants.BOOT_APP_ENABLED, isChecked);
+                if (isChecked) {
+                    requestOverlayPermissionForBackgroundLaunch();
+                }
                 updateSelectionView();
                 updateWakeMonitoring();
             }
@@ -158,6 +164,13 @@ public class MainActivity extends AppCompatActivity {
                                 AdvancedSettingsActivity.class));
                     }
                 });
+
+        // Existing users may already have Launch on Boot enabled after upgrading to a version
+        // that targets Android 14. Ask once while this activity is visible, where the user can
+        // make an informed decision in system Settings.
+        if (mSwitchEnabled.isChecked()) {
+            requestOverlayPermissionForBackgroundLaunch();
+        }
 
         mButtonSelectApp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -356,5 +369,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateWakeMonitoring() {
         DreamListenerService.updateRunningState(getApplicationContext());
+    }
+
+    private void requestOverlayPermissionForBackgroundLaunch() {
+        if (overlayPermissionRequestAttempted
+                || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M
+                || Settings.canDrawOverlays(this)) {
+            return;
+        }
+        overlayPermissionRequestAttempted = true;
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:" + getPackageName()));
+        try {
+            startActivity(intent);
+        } catch (android.content.ActivityNotFoundException e) {
+            // Some TV firmware exposes only the general overlay settings screen.
+            startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION));
+        }
     }
 }
