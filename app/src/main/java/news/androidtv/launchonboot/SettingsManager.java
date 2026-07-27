@@ -53,11 +53,18 @@ public class SettingsManager {
         return getString(key, "-1", def);
     }
     public String getString(String key, String val, String def) {
-        String result = sharedPreferences.getString(key, val);
-        assert result != null;
+        String result;
+        try {
+            result = sharedPreferences.getString(key, val);
+        } catch (ClassCastException e) {
+            Object stored = sharedPreferences.getAll().get(key);
+            result = stored == null ? val : String.valueOf(stored);
+        }
+        if (result == null) {
+            result = val;
+        }
         if(result.equals("-1")) {
             editor.putString(key, def);
-            Log.d(TAG, key + ", " + def);
             editor.commit();
             result = def;
         }
@@ -83,9 +90,8 @@ public class SettingsManager {
         try {
             result = sharedPreferences.getBoolean(key, def);
         } catch(ClassCastException e) {
-            //Result is not a boolean
-            result = sharedPreferences.getString(key, def+"").equals("true");
-            Log.d(TAG, "Recasted "+key+" with "+result);
+            Object stored = sharedPreferences.getAll().get(key);
+            result = stored == null ? def : Boolean.parseBoolean(String.valueOf(stored));
         }
         editor.putBoolean(key, result);
         editor.commit();

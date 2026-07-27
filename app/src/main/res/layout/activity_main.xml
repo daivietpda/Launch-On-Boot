@@ -114,11 +114,19 @@
             android:layout_height="wrap_content" />
         <Button
             android:layout_width="wrap_content"
-            android:text="Test"
-            android:id="@+id/button_test"
+            android:text="@string/button_advanced_settings"
+            android:id="@+id/button_advanced_settings"
             android:background="@color/colorPrimaryDark"
             android:layout_below="@id/text_package_name"
-            android:layout_marginTop="64dp"
+            android:layout_marginTop="16dp"
+            android:layout_height="wrap_content" />
+        <Button
+            android:layout_width="wrap_content"
+            android:text="@string/button_test"
+            android:id="@+id/button_test"
+            android:background="@color/colorPrimaryDark"
+            android:layout_below="@id/button_advanced_settings"
+            android:layout_marginTop="16dp"
             android:layout_height="wrap_content" />
     </RelativeLayout>
 </RelativeLayout>

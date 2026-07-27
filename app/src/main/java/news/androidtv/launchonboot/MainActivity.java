@@ -2,15 +2,11 @@ package news.androidtv.launchonboot;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -67,8 +63,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        addOverlay();
-    	launcherApplications = getLauncherApps();
+        launcherApplications = getLauncherApps();
         mSettingsManager = new SettingsManager(this);
         if (!mSettingsManager.getBoolean(ONBOARDING)) {
             startActivity(new Intent(this, OnboardingActivity.class));
@@ -106,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
                 mSettingsManager.setBoolean(
                         SettingsManagerConstants.BOOT_APP_ENABLED, isChecked);
                 updateSelectionView();
+                updateWakeMonitoring();
             }
         });
         mSwitchLiveChannels.setOnCheckedChangeListener
@@ -124,9 +120,7 @@ public class MainActivity extends AppCompatActivity {
                         mSettingsManager.setBoolean(
                                 SettingsManagerConstants.ON_WAKEUP, isChecked);
                         updateSelectionView();
-                        if (isChecked) {
-                            startForegroundService();
-                        }
+                        updateWakeMonitoring();
                     }
                 });
 
@@ -148,10 +142,22 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button_test).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this, BootReceiver.class);
-                sendBroadcast(i);
+                // BootReceiver correctly accepts only the system BOOT_COMPLETED broadcast.
+                // A user-initiated test must enter the same scheduling flow directly instead
+                // of sending an actionless broadcast that the receiver will ignore.
+                Log.i(TAG, "Manual boot-flow test requested");
+                DreamListenerService.startForTrigger(getApplicationContext(),
+                        PostLaunchActionScheduler.Trigger.BOOT);
             }
         });
+        findViewById(R.id.button_advanced_settings).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        startActivity(new Intent(MainActivity.this,
+                                AdvancedSettingsActivity.class));
+                    }
+                });
 
         mButtonSelectApp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -210,16 +216,21 @@ public class MainActivity extends AppCompatActivity {
                         getResources().getColor(R.color.colorPrimaryDark));
             }
         });
+        findViewById(R.id.button_advanced_settings).setOnFocusChangeListener(
+                new View.OnFocusChangeListener() {
+                    @Override
+                    public void onFocusChange(View v, boolean hasFocus) {
+                        v.setBackgroundColor(hasFocus
+                                ? getResources().getColor(R.color.colorAccent)
+                                : getResources().getColor(R.color.colorPrimaryDark));
+                    }
+                });
 
         if (DEBUG) {
             Log.d(TAG, launcherApplications.toString());
             getAppNames(launcherApplications);
         }
-        registerReceiver(new BootReceiver(), new IntentFilter(Intent.ACTION_SCREEN_ON));
-
-        if (mSettingsManager.getBoolean(SettingsManagerConstants.ON_WAKEUP)) {
-            startForegroundService();
-        }
+        updateWakeMonitoring();
     }
 
     public AppListItem[] getAppList()
@@ -343,27 +354,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void startForegroundService() {
-        // Ideally only starts once :thinking-emoji:
-        Intent i = new Intent(MainActivity.this, DreamListenerService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(i);
-        } else {
-            startService(i);
-        }
-    }
-
-    public void addOverlay() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !Settings.canDrawOverlays(this)) {
-            Intent i = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-            try {
-                startActivityForResult(i, 4711);
-            } catch (android.content.ActivityNotFoundException e) {
-                // Some devices don't support the direct link to the app's overlay settings.
-                // Fall back to the general overlay settings.
-                Intent fallbackIntent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                startActivityForResult(fallbackIntent, 4711);
-            }
-        }
+    private void updateWakeMonitoring() {
+        DreamListenerService.updateRunningState(getApplicationContext());
     }
 }
