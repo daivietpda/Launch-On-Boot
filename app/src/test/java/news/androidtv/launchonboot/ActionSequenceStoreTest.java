@@ -155,6 +155,16 @@ public class ActionSequenceStoreTest {
         ).isEmpty());
     }
 
+    @Test
+    public void deserialize_rejectsNumericFieldsStoredAsStrings() {
+        try {
+            ActionSequenceStore.deserialize("[{\"type\":\"WAIT\",\"durationMs\":\"1000\"}]");
+            fail("Expected JSONException");
+        } catch (JSONException expected) {
+            assertTrue(expected.getMessage().contains("durationMs"));
+        }
+    }
+
     private void assertIllegalArgument(Runnable action) {
         try {
             action.run();

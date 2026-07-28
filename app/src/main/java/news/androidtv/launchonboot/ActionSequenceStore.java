@@ -167,7 +167,11 @@ public final class ActionSequenceStore {
             if (array.isNull(i)) {
                 throw new JSONException("Action item at index " + i + " must not be null");
             }
-            actions.add(ActionItem.fromJson(array.getJSONObject(i)));
+            try {
+                actions.add(ActionItem.fromJson(array.getJSONObject(i)));
+            } catch (JSONException | IllegalArgumentException e) {
+                throw new JSONException("Action " + (i + 1) + ": " + e.getMessage());
+            }
         }
         return Collections.unmodifiableList(actions);
     }

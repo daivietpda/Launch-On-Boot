@@ -238,7 +238,10 @@ public final class ActionItem {
             throw new JSONException("Action item must not be null");
         }
 
-        String typeName = json.optString(JSON_TYPE, "");
+        if (!json.has(JSON_TYPE) || !(json.opt(JSON_TYPE) instanceof String)) {
+            throw new JSONException("Action type is required");
+        }
+        String typeName = (String) json.opt(JSON_TYPE);
         Type parsedType;
         try {
             parsedType = Type.valueOf(typeName);
@@ -251,28 +254,49 @@ public final class ActionItem {
                 if (!json.has(JSON_DURATION_MS)) {
                     throw new JSONException("WAIT action requires durationMs");
                 }
-                return waitFor(json.getLong(JSON_DURATION_MS));
+                return waitFor(requireInteger(json, JSON_DURATION_MS));
             }
 
             boolean delayAfterMsSet = json.has(JSON_DELAY_AFTER_MS);
             long delayAfterMs = delayAfterMsSet
-                    ? json.getLong(JSON_DELAY_AFTER_MS) : DEFAULT_DELAY_AFTER_MS;
-            int repeat = json.has(JSON_REPEAT) ? json.getInt(JSON_REPEAT) : DEFAULT_REPEAT;
+                    ? requireInteger(json, JSON_DELAY_AFTER_MS) : DEFAULT_DELAY_AFTER_MS;
+            long repeatValue = json.has(JSON_REPEAT)
+                    ? requireInteger(json, JSON_REPEAT) : DEFAULT_REPEAT;
+            if (repeatValue > Integer.MAX_VALUE) {
+                throw new JSONException("repeat must be an integer");
+            }
+            int repeat = (int) repeatValue;
             if (parsedType == Type.TEXT) {
                 if (!json.has(JSON_TEXT)) {
                     throw new JSONException("TEXT action requires text");
                 }
-                return text(json.getString(JSON_TEXT), delayAfterMs, repeat);
+                return text(requireString(json, JSON_TEXT), delayAfterMs, repeat);
             }
             if (!json.has(JSON_KEY_CODE)) {
                 throw new JSONException("KEY action requires keyCode");
             }
-            ActionItem action = key(json.getString(JSON_KEY_CODE), delayAfterMs, repeat);
+            ActionItem action = key(requireString(json, JSON_KEY_CODE), delayAfterMs, repeat);
             return delayAfterMsSet ? action : new ActionItem(action.type, action.keyCode,
                     action.durationMs, action.delayAfterMs, false, action.repeat);
         } catch (IllegalArgumentException e) {
             throw new JSONException(e.getMessage());
         }
+    }
+
+    private static long requireInteger(JSONObject json, String name) throws JSONException {
+        Object value = json.get(name);
+        if (!(value instanceof Integer) && !(value instanceof Long)) {
+            throw new JSONException(name + " must be an integer");
+        }
+        return ((Number) value).longValue();
+    }
+
+    private static String requireString(JSONObject json, String name) throws JSONException {
+        Object value = json.get(name);
+        if (!(value instanceof String)) {
+            throw new JSONException(name + " must be a string");
+        }
+        return (String) value;
     }
 
     @Override
