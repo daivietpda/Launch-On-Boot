@@ -1,29 +1,64 @@
-# Quick Links
-<img src='https://raw.githubusercontent.com/ITVlab/Launch-On-Boot/master/promo/banner2.png' />
-
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-     alt="Get it on F-Droid"
-     height="80">](https://f-droid.org/packages/news.androidtv.launchonboot/)
-[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
-     alt="Get it on Google Play"
-     height="80">](https://play.google.com/store/apps/details?id=news.androidtv.launchonboot)
-
-## Download APK
-You can download the latest version of the app directly from the [GitHub Releases](https://github.com/daivietpda/Launch-On-Boot/releases) page or use the pre-built APK in the repository:
-* [Launch-On-Boot.apk](Launch-On-Boot.apk)
-
 # Launch-On-Boot
-_Launches a TV app when the device boots_
 
-On Google TV, there was a way to launch a specific app when the device booted. By default the device would display the TV stream, making the OS feel more like an overlay on top of your television than something completely isolated.
+Launch-On-Boot opens a selected Android TV application after the device boots. It also provides an optional **Advanced Actions** sequence that runs after the target application has opened.
 
-Android TV will simply just display the launcher on a reboot, a small distraction for users expecting to see TV and annoying for individuals using Android TV as a dumb kiosk displaying a single video or stream.
+The project is useful for TV devices that should start in a predictable state: a television app can open automatically and then receive a configured sequence such as waiting for the interface, entering a channel number, and confirming it.
 
-This app allows the user to select a specific app to open when the device boots. It's just that simple. Any leanback-enabled app can be opened. Alternatively, the default TV app can be opened, returning you to the channel you just saw.
+Vietnamese documentation: [README-vi.md](README-vi.md).
 
-Want to make your Android TV act more like a dumb TV? Want to launch Sling TV immediately. You should download this small utility app.
+## Main features
 
-## Screenshots
-<img src='promo/LaunchOnBoot-1.png' />
+- Choose an installed Android TV application to open after boot.
+- Optional launch after wake-up from sleep or screensaver.
+- Configurable pre-launch and post-launch delays.
+- Advanced Actions can run after the target application opens.
+- Android TV remote-friendly UI: actions are arranged with buttons, not drag and drop.
 
-<img src='promo/LaunchOnBoot-2.png' />
+## Advanced Actions
+
+Advanced Actions is intended for two common scenarios:
+
+1. **Easier television use for older people**: open a TV app, wait for it to load, enter a channel number, and press OK automatically.
+2. **Kiosk and automation projects**: open a chosen app and perform a predictable set of navigation, timing, or text-entry actions after launch.
+
+The Advanced Settings screen contains only general configuration: triggers, delays, and ADB connection settings. Select **Set up action sequence** to open the dedicated sequence editor.
+
+The editor supports:
+
+- Navigation keys: Up, Down, Left, Right, OK.
+- Number keys: 0 through 9.
+- Controls: Back, Home, Menu, Enter.
+- `WAIT` actions.
+- `TEXT` actions.
+- Edit, delete, move up/down, clear, save, and test a sequence.
+
+Example sequence for selecting channel 1:
+
+```text
+WAIT 1000 ms
+KEYCODE_1 — wait after 300 ms — repeat 1
+```
+
+Sequences are stored internally as JSON in the app's private SharedPreferences. The normal UI does not require users to view or type JSON.
+
+## ADB input and text
+
+System key injection uses the embedded ADB client and requires ADB debugging to be enabled on the TV. The first connection may require confirmation of the Android RSA authorization dialog.
+
+`TEXT` is sent through Android's `input text` command. It works only while an editable field in the target app has focus. For safety and compatibility, the current ADB text backend accepts printable ASCII except `%`; accented Vietnamese characters, emoji, and line breaks are kept in the saved sequence but are reported as unsupported when the sequence runs.
+
+Do not enable ADB on untrusted networks. The default ADB target is `127.0.0.1:5555`.
+
+## Android 14 background-launch note
+
+Some Android 14 firmware blocks an app from opening another app after boot unless a permitted background-launch exemption is available. Launch-On-Boot can guide the user to grant **Display over other apps**. This is a user-controlled special permission and some vendor firmware may reset it after reboot; an ordinary app cannot restore it itself.
+
+## Build and test
+
+The project uses Gradle. A compatible JDK is required; the Android Studio bundled JDK is known to work.
+
+```powershell
+./gradlew.bat :app:testDebugUnitTest :app:assembleDebug
+```
+
+Manual TV testing should cover boot, wake-up, target-app launch, ADB authorization, the action editor, and cancellation while a sequence is waiting.

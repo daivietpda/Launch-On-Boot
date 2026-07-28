@@ -13,6 +13,9 @@ public class SettingsManagerConstants {
     public static final String SHOW_ALL_APPS = "SHOW_ALL_APPS";
     public static final String ADVANCED_ACTIONS_ENABLED = "ADVANCED_ACTIONS_ENABLED";
     public static final String ADVANCED_ACTIONS_JSON = "ADVANCED_ACTIONS_JSON";
+    /** Prevents the starter sequence from returning after a user deliberately clears it. */
+    public static final String ADVANCED_ACTIONS_DEMO_INITIALIZED =
+            "ADVANCED_ACTIONS_DEMO_INITIALIZED";
     public static final String ACTION_TRIGGER_BOOT = "ACTION_TRIGGER_BOOT";
     public static final String ACTION_TRIGGER_WAKE = "ACTION_TRIGGER_WAKE";
     public static final String APP_LAUNCH_DELAY_MS = "APP_LAUNCH_DELAY_MS";

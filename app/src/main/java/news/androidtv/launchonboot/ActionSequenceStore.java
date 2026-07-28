@@ -1,6 +1,8 @@
 package news.androidtv.launchonboot;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -19,7 +21,9 @@ public final class ActionSequenceStore {
     public static final long DEFAULT_ACTION_DELAY_MS = 300L;
     /** Example shown by the advanced-settings editor before the user saves a sequence. */
     public static final String DEFAULT_DEMO_ACTIONS_JSON =
-            "[{\"type\":\"KEY\",\"keyCode\":\"KEYCODE_1\",\"delayAfterMs\":500,\"repeat\":1}]";
+            "[{\"type\":\"WAIT\",\"durationMs\":1000},"
+                    + "{\"type\":\"KEY\",\"keyCode\":\"KEYCODE_1\","
+                    + "\"delayAfterMs\":300,\"repeat\":1}]";
     public static final String DEFAULT_KEY_INJECTION_METHOD = "NONE";
     public static final String DEFAULT_ADB_HOST = "127.0.0.1";
     public static final int DEFAULT_ADB_PORT = 5555;
@@ -72,6 +76,33 @@ public final class ActionSequenceStore {
 
     public void clearActionSequence() {
         settingsManager.setString(SettingsManagerConstants.ADVANCED_ACTIONS_JSON, "");
+    }
+
+    /**
+     * Saves the starter sequence once for an empty new/legacy configuration.
+     * Invalid non-empty JSON is deliberately left untouched for user recovery.
+     */
+    public List<ActionItem> ensureInitialDemo() throws JSONException {
+        Context context = settingsManager.getContext();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences.getBoolean(SettingsManagerConstants.ADVANCED_ACTIONS_DEMO_INITIALIZED,
+                false)) {
+            return getActionSequence();
+        }
+        String rawJson;
+        try {
+            rawJson = preferences.getString(SettingsManagerConstants.ADVANCED_ACTIONS_JSON, "");
+        } catch (ClassCastException e) {
+            return getActionSequence();
+        }
+        if (rawJson == null || rawJson.trim().isEmpty() || "[]".equals(rawJson.trim())) {
+            List<ActionItem> demo = deserialize(DEFAULT_DEMO_ACTIONS_JSON);
+            save(demo);
+            preferences.edit().putBoolean(
+                    SettingsManagerConstants.ADVANCED_ACTIONS_DEMO_INITIALIZED, true).apply();
+            return demo;
+        }
+        return getActionSequence();
     }
 
     /** Restores all advanced-action settings to their safe defaults. */

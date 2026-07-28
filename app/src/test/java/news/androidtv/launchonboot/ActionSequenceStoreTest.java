@@ -13,6 +13,18 @@ import static org.junit.Assert.fail;
 
 public class ActionSequenceStoreTest {
     @Test
+    public void defaultDemoHasWaitThenNumberOneWithRequestedDelay() throws Exception {
+        List<ActionItem> actions =
+                ActionSequenceStore.deserialize(ActionSequenceStore.DEFAULT_DEMO_ACTIONS_JSON);
+        assertEquals(2, actions.size());
+        assertEquals(ActionItem.Type.WAIT, actions.get(0).getType());
+        assertEquals(1000L, actions.get(0).getDurationMs());
+        assertEquals("KEYCODE_1", actions.get(1).getKeyCode());
+        assertEquals(300L, actions.get(1).getDelayAfterMs());
+        assertEquals(1, actions.get(1).getRepeat());
+    }
+
+    @Test
     public void textActionRoundTripsWithoutChangingOlderFormat() throws Exception {
         List<ActionItem> actions = Arrays.asList(ActionItem.key("KEYCODE_1", 200, 1),
                 ActionItem.text("105", 500, 1), ActionItem.waitFor(1000));

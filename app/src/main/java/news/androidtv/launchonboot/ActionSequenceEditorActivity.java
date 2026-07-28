@@ -31,7 +31,12 @@ public final class ActionSequenceEditorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_action_sequence_editor);
         actionList = findViewById(R.id.action_list_container);
         status = findViewById(R.id.text_editor_status);
-        actions.addAll(new ActionSequenceStore(this).getActionSequence());
+        ActionSequenceStore store = new ActionSequenceStore(this);
+        try {
+            actions.addAll(store.ensureInitialDemo());
+        } catch (JSONException e) {
+            throw new IllegalStateException("Invalid built-in action demo", e);
+        }
         render();
         findViewById(R.id.button_add_action).setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) { chooseGroup(); } });
         findViewById(R.id.button_save_action_sequence).setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) { save(); } });

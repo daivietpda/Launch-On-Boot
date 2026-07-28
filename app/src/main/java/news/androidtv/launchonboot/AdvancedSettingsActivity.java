@@ -34,6 +34,11 @@ public final class AdvancedSettingsActivity extends AppCompatActivity {
         statusView = findViewById(R.id.text_adb_status);
         sequenceSummaryView = findViewById(R.id.text_action_sequence_summary);
         loadConfiguration();
+        try {
+            new ActionSequenceStore(this).ensureInitialDemo();
+        } catch (org.json.JSONException e) {
+            statusView.setText(getString(R.string.advanced_invalid_json, e.getMessage()));
+        }
         findViewById(R.id.button_edit_action_sequence).setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 startActivity(new Intent(AdvancedSettingsActivity.this, ActionSequenceEditorActivity.class));
