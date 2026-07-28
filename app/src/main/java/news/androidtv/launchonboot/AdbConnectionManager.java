@@ -30,6 +30,7 @@ import java.util.concurrent.TimeoutException;
  */
 public final class AdbConnectionManager implements AutoCloseable {
     static final String KEY_COMMAND_RESULT_PREFIX = "__LOB_KEY_EXIT__";
+    static final String TEXT_COMMAND_RESULT_PREFIX = "__LOB_TEXT_EXIT__";
     private static final String SHELL_PROBE_MARKER = "__LOB_SHELL_OK__";
     private static final int MAX_SHELL_OUTPUT_BYTES = 4096;
 
@@ -366,6 +367,24 @@ public final class AdbConnectionManager implements AutoCloseable {
 
             String command = AdbKeyCodeMapper.buildShellCommand(keyCode);
             Result result = executeCommand(command, KEY_COMMAND_RESULT_PREFIX + "0");
+            lastResult = result;
+            if (!result.isSuccessful()) {
+                disconnectInternal(false);
+                transition(State.FAILED, null, 0, config.retryCount + 1);
+            }
+            return result;
+        }
+    }
+
+    Result sendText(String text) {
+        synchronized (operationLock) {
+            String command = AdbTextEncoder.buildShellCommand(text);
+            Result connectionResult = ensureConnected(null);
+            if (!connectionResult.isSuccessful()) {
+                lastResult = connectionResult;
+                return connectionResult;
+            }
+            Result result = executeCommand(command, TEXT_COMMAND_RESULT_PREFIX + "0");
             lastResult = result;
             if (!result.isSuccessful()) {
                 disconnectInternal(false);

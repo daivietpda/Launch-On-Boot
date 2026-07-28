@@ -39,6 +39,18 @@ public final class AdbKeyInjector implements KeyInjector, AutoCloseable {
         return lastResult.isSuccessful();
     }
 
+    @Override
+    public boolean sendText(String text) {
+        try {
+            lastResult = connectionManager.sendText(text);
+            return lastResult.isSuccessful();
+        } catch (IllegalArgumentException e) {
+            lastResult = AdbConnectionManager.Result.failure(
+                    AdbConnectionManager.Error.INVALID_CONFIGURATION, e.getMessage());
+            return false;
+        }
+    }
+
     public AdbConnectionManager.Result getLastResult() {
         return lastResult;
     }

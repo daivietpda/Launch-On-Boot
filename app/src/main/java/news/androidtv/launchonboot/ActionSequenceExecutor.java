@@ -21,7 +21,8 @@ public final class ActionSequenceExecutor implements AutoCloseable {
         COMPLETED,
         CANCELLED,
         INJECTOR_UNAVAILABLE,
-        KEY_SEND_FAILED
+        KEY_SEND_FAILED,
+        TEXT_SEND_FAILED
     }
 
     /**
@@ -190,6 +191,30 @@ public final class ActionSequenceExecutor implements AutoCloseable {
                 if (!keyInjector.isAvailable()) {
                     result = Result.INJECTOR_UNAVAILABLE;
                     break;
+                }
+
+                if (action.getType() == ActionItem.Type.TEXT) {
+                    long delayAfterMs = action.isDelayAfterMsSet()
+                            ? action.getDelayAfterMs() : defaultActionDelayMs;
+                    for (int repeatIndex = 0; repeatIndex < action.getRepeat(); repeatIndex++) {
+                        if (isCancellationRequested()) {
+                            result = Result.CANCELLED;
+                            break;
+                        }
+                        if (!keyInjector.sendText(action.getText())) {
+                            result = isCancellationRequested()
+                                    ? Result.CANCELLED : Result.TEXT_SEND_FAILED;
+                            break;
+                        }
+                        if (!waitFor(delayAfterMs)) {
+                            result = Result.CANCELLED;
+                            break;
+                        }
+                    }
+                    if (result != Result.COMPLETED) {
+                        break;
+                    }
+                    continue;
                 }
 
                 int keyCode = ActionItem.KeyCode.fromValue(action.getKeyCode()).getKeyEventCode();

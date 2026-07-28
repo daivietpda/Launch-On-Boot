@@ -50,6 +50,10 @@
             android:name=".AdvancedSettingsActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ActionSequenceEditorActivity"
+            android:exported="false" />
+
         <receiver
             android:enabled="true"
             android:name=".BootReceiver"

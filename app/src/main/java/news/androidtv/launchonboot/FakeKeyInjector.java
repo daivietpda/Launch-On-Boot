@@ -10,6 +10,7 @@ import java.util.List;
  */
 public final class FakeKeyInjector implements KeyInjector {
     private final List<Integer> requestedKeyCodes = new ArrayList<>();
+    private final List<String> requestedTexts = new ArrayList<>();
     private volatile boolean available = true;
     private volatile boolean sendSucceeds = true;
 
@@ -29,6 +30,17 @@ public final class FakeKeyInjector implements KeyInjector {
         return sendSucceeds;
     }
 
+    @Override
+    public boolean sendText(String text) {
+        if (!available) {
+            return false;
+        }
+        synchronized (requestedTexts) {
+            requestedTexts.add(text);
+        }
+        return sendSucceeds;
+    }
+
     public void setAvailable(boolean available) {
         this.available = available;
     }
@@ -40,6 +52,12 @@ public final class FakeKeyInjector implements KeyInjector {
     public List<Integer> getRequestedKeyCodes() {
         synchronized (requestedKeyCodes) {
             return Collections.unmodifiableList(new ArrayList<>(requestedKeyCodes));
+        }
+    }
+
+    public List<String> getRequestedTexts() {
+        synchronized (requestedTexts) {
+            return Collections.unmodifiableList(new ArrayList<>(requestedTexts));
         }
     }
 }

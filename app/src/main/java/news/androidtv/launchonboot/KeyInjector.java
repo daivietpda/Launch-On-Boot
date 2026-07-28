@@ -9,6 +9,11 @@ public interface KeyInjector {
 
     boolean sendKey(int keyCode);
 
+    /** Sends text to the focused input field when this backend supports it. */
+    default boolean sendText(String text) {
+        return false;
+    }
+
     /**
      * Releases transient resources after a sequence. Implementations may
      * reconnect when a later sequence starts.

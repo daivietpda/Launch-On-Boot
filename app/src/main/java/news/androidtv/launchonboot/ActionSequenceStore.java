@@ -15,7 +15,7 @@ public final class ActionSequenceStore {
     public static final boolean DEFAULT_ACTION_TRIGGER_BOOT = true;
     public static final boolean DEFAULT_ACTION_TRIGGER_WAKE = true;
     public static final long DEFAULT_APP_LAUNCH_DELAY_MS = 5000L;
-    public static final long DEFAULT_POST_LAUNCH_DELAY_MS = 0L;
+    public static final long DEFAULT_POST_LAUNCH_DELAY_MS = 10_000L;
     public static final long DEFAULT_ACTION_DELAY_MS = 300L;
     /** Example shown by the advanced-settings editor before the user saves a sequence. */
     public static final String DEFAULT_DEMO_ACTIONS_JSON =

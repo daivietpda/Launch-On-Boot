@@ -13,6 +13,17 @@ import static org.junit.Assert.fail;
 
 public class ActionSequenceStoreTest {
     @Test
+    public void textActionRoundTripsWithoutChangingOlderFormat() throws Exception {
+        List<ActionItem> actions = Arrays.asList(ActionItem.key("KEYCODE_1", 200, 1),
+                ActionItem.text("105", 500, 1), ActionItem.waitFor(1000));
+        assertEquals(actions, ActionSequenceStore.deserialize(ActionSequenceStore.serialize(actions)));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void emptyTextIsRejected() {
+        ActionItem.text("   ", 0, 1);
+    }
+    @Test
     public void serializeAndDeserialize_preservesDocumentedFormat() throws JSONException {
         List<ActionItem> actions = Arrays.asList(
                 ActionItem.waitFor(10000),

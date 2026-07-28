@@ -68,6 +68,19 @@ public class ActionSequenceExecutorTest {
     }
 
     @Test
+    public void textAction_isSentInSequence() throws Exception {
+        FakeKeyInjector injector = new FakeKeyInjector();
+        executor = new ActionSequenceExecutor(injector, 0);
+        RecordingListener listener = new RecordingListener();
+
+        executor.start(Arrays.asList(ActionItem.key("KEYCODE_1", 0, 1),
+                ActionItem.text("105", 0, 2)), listener);
+
+        assertEquals(ActionSequenceExecutor.Result.COMPLETED, listener.awaitResult());
+        assertEquals(Arrays.asList("105", "105"), injector.getRequestedTexts());
+    }
+
+    @Test
     public void repeatedKey_sendsRequestedNumberOfTimes() throws Exception {
         FakeKeyInjector injector = new FakeKeyInjector();
         executor = new ActionSequenceExecutor(injector, 0);

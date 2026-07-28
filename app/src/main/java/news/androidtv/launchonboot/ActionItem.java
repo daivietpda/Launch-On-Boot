@@ -24,13 +24,15 @@ import java.util.Set;
 public final class ActionItem {
     public enum Type {
         WAIT,
-        KEY
+        KEY,
+        TEXT
     }
 
     public static final long DEFAULT_DELAY_AFTER_MS = 0L;
     public static final int DEFAULT_REPEAT = 1;
     public static final long MAX_ACTION_TIME_MS = 86_400_000L;
     public static final int MAX_REPEAT = 1_000;
+    public static final int MAX_TEXT_LENGTH = 200;
 
     /**
      * Key codes supported by the first version of the action sequence.
@@ -93,6 +95,7 @@ public final class ActionItem {
     private static final String JSON_DURATION_MS = "durationMs";
     private static final String JSON_DELAY_AFTER_MS = "delayAfterMs";
     private static final String JSON_REPEAT = "repeat";
+    private static final String JSON_TEXT = "text";
 
     private final Type type;
     private final String keyCode;
@@ -100,15 +103,22 @@ public final class ActionItem {
     private final long delayAfterMs;
     private final boolean delayAfterMsSet;
     private final int repeat;
+    private final String text;
 
     private ActionItem(Type type, String keyCode, long durationMs, long delayAfterMs,
                        boolean delayAfterMsSet, int repeat) {
+        this(type, keyCode, durationMs, delayAfterMs, delayAfterMsSet, repeat, null);
+    }
+
+    private ActionItem(Type type, String keyCode, long durationMs, long delayAfterMs,
+                       boolean delayAfterMsSet, int repeat, String text) {
         this.type = type;
         this.keyCode = keyCode;
         this.durationMs = durationMs;
         this.delayAfterMs = delayAfterMs;
         this.delayAfterMsSet = delayAfterMsSet;
         this.repeat = repeat;
+        this.text = text;
     }
 
     public static ActionItem waitFor(long durationMs) {
@@ -119,12 +129,7 @@ public final class ActionItem {
 
     public static ActionItem key(String keyCode, long delayAfterMs, int repeat) {
         validateActionTime(delayAfterMs, "delayAfterMs");
-        if (repeat < 1) {
-            throw new IllegalArgumentException("repeat must be at least 1");
-        }
-        if (repeat > MAX_REPEAT) {
-            throw new IllegalArgumentException("repeat must not exceed " + MAX_REPEAT);
-        }
+        validateRepeat(repeat);
         KeyCode allowedKeyCode = KeyCode.fromValue(keyCode);
         return new ActionItem(Type.KEY, allowedKeyCode.getAndroidKeyCode(), 0L, delayAfterMs,
                 true, repeat);
@@ -135,6 +140,13 @@ public final class ActionItem {
             throw new IllegalArgumentException("keyCode must not be null");
         }
         return key(keyCode.getAndroidKeyCode(), delayAfterMs, repeat);
+    }
+
+    public static ActionItem text(String text, long delayAfterMs, int repeat) {
+        validateText(text);
+        validateActionTime(delayAfterMs, "delayAfterMs");
+        validateRepeat(repeat);
+        return new ActionItem(Type.TEXT, null, 0L, delayAfterMs, true, repeat, text);
     }
 
     public static Set<String> getAllowedKeyCodes() {
@@ -170,6 +182,28 @@ public final class ActionItem {
         return repeat;
     }
 
+    public String getText() {
+        return text;
+    }
+
+    public static void validateText(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("text must not be empty");
+        }
+        if (value.length() > MAX_TEXT_LENGTH) {
+            throw new IllegalArgumentException("text must not exceed " + MAX_TEXT_LENGTH + " characters");
+        }
+    }
+
+    private static void validateRepeat(int value) {
+        if (value < 1) {
+            throw new IllegalArgumentException("repeat must be at least 1");
+        }
+        if (value > MAX_REPEAT) {
+            throw new IllegalArgumentException("repeat must not exceed " + MAX_REPEAT);
+        }
+    }
+
     static void validateActionTime(long value, String name) {
         if (value < 0) {
             throw new IllegalArgumentException(name + " must not be negative");
@@ -185,11 +219,15 @@ public final class ActionItem {
         json.put(JSON_TYPE, type.name());
         if (type == Type.WAIT) {
             json.put(JSON_DURATION_MS, durationMs);
-        } else {
+        } else if (type == Type.KEY) {
             json.put(JSON_KEY_CODE, keyCode);
             if (delayAfterMsSet) {
                 json.put(JSON_DELAY_AFTER_MS, delayAfterMs);
             }
+            json.put(JSON_REPEAT, repeat);
+        } else {
+            json.put(JSON_TEXT, text);
+            json.put(JSON_DELAY_AFTER_MS, delayAfterMs);
             json.put(JSON_REPEAT, repeat);
         }
         return json;
@@ -216,13 +254,19 @@ public final class ActionItem {
                 return waitFor(json.getLong(JSON_DURATION_MS));
             }
 
-            if (!json.has(JSON_KEY_CODE)) {
-                throw new JSONException("KEY action requires keyCode");
-            }
             boolean delayAfterMsSet = json.has(JSON_DELAY_AFTER_MS);
             long delayAfterMs = delayAfterMsSet
                     ? json.getLong(JSON_DELAY_AFTER_MS) : DEFAULT_DELAY_AFTER_MS;
             int repeat = json.has(JSON_REPEAT) ? json.getInt(JSON_REPEAT) : DEFAULT_REPEAT;
+            if (parsedType == Type.TEXT) {
+                if (!json.has(JSON_TEXT)) {
+                    throw new JSONException("TEXT action requires text");
+                }
+                return text(json.getString(JSON_TEXT), delayAfterMs, repeat);
+            }
+            if (!json.has(JSON_KEY_CODE)) {
+                throw new JSONException("KEY action requires keyCode");
+            }
             ActionItem action = key(json.getString(JSON_KEY_CODE), delayAfterMs, repeat);
             return delayAfterMsSet ? action : new ActionItem(action.type, action.keyCode,
                     action.durationMs, action.delayAfterMs, false, action.repeat);
@@ -245,11 +289,12 @@ public final class ActionItem {
                 && delayAfterMsSet == that.delayAfterMsSet
                 && repeat == that.repeat
                 && type == that.type
-                && Objects.equals(keyCode, that.keyCode);
+                && Objects.equals(keyCode, that.keyCode)
+                && Objects.equals(text, that.text);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, keyCode, durationMs, delayAfterMs, delayAfterMsSet, repeat);
+        return Objects.hash(type, keyCode, durationMs, delayAfterMs, delayAfterMsSet, repeat, text);
     }
 }
