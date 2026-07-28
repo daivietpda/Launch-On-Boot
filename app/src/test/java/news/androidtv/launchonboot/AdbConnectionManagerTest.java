@@ -307,6 +307,20 @@ public class AdbConnectionManagerTest {
         assertEquals(0, attempts.get());
     }
 
+    @Test
+    public void resolvedComponentValidation_rejectsShellInjection() {
+        assertTrue(AdbConnectionManager.isValidComponentName(
+                "com.example.tv/com.example.tv.MainActivity"));
+        assertFalse(AdbConnectionManager.isValidComponentName(
+                "com.example.tv;input keyevent HOME/MainActivity"));
+        assertFalse(AdbConnectionManager.isValidComponentName(
+                "com.example.tv/MainActivity && id"));
+        assertFalse(AdbConnectionManager.isValidComponentName(
+                "com.example.tv/$(id)"));
+        assertFalse(AdbConnectionManager.isValidComponentName(
+                "com.example.tv/Main\nActivity"));
+    }
+
     private static AdbConnectionManager.Config config(
             String host, int retryCount, long retryDelayMs,
             long connectionTimeoutMs, long commandTimeoutMs) {

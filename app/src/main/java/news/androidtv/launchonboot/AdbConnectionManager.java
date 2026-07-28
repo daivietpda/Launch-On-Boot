@@ -32,6 +32,7 @@ public final class AdbConnectionManager implements AutoCloseable {
     static final String KEY_COMMAND_RESULT_PREFIX = "__LOB_KEY_EXIT__";
     static final String TEXT_COMMAND_RESULT_PREFIX = "__LOB_TEXT_EXIT__";
     static final String FORCE_STOP_COMMAND_RESULT_PREFIX = "__LOB_FORCE_STOP_EXIT__";
+    static final String START_ACTIVITY_COMMAND_RESULT_PREFIX = "__LOB_START_EXIT__";
     private static final String SHELL_PROBE_MARKER = "__LOB_SHELL_OK__";
     private static final int MAX_SHELL_OUTPUT_BYTES = 4096;
 
@@ -266,6 +267,12 @@ public final class AdbConnectionManager implements AutoCloseable {
     interface Session extends Closeable {
         boolean execute(String command, String expectedMarker)
                 throws IOException, InterruptedException;
+
+        /** Raw shell output is needed only for the fixed am start -W command. */
+        default String executeForOutput(String command, String expectedMarker)
+                throws IOException, InterruptedException {
+            return execute(command, expectedMarker) ? expectedMarker : "";
+        }
     }
 
     interface SessionFactory {
@@ -427,9 +434,57 @@ public final class AdbConnectionManager implements AutoCloseable {
         }
     }
 
+    CommandResult startResolvedActivity(String componentName, String category) {
+        synchronized (operationLock) {
+            if (!isValidComponentName(componentName)
+                    || !("android.intent.category.LEANBACK_LAUNCHER".equals(category)
+                    || "android.intent.category.LAUNCHER".equals(category))) {
+                Result failure = Result.failure(Error.INVALID_CONFIGURATION,
+                        "The resolved target component is invalid");
+                lastResult = failure;
+                return new CommandResult(failure, "");
+            }
+            Result connection = ensureConnected(null);
+            if (!connection.isSuccessful()) {
+                lastResult = connection;
+                return new CommandResult(connection, "");
+            }
+            String command = "am start -W --user 0 -a android.intent.action.MAIN -c "
+                    + category + " -n " + componentName + "; echo "
+                    + START_ACTIVITY_COMMAND_RESULT_PREFIX + "$?";
+            CommandResult result = executeCommandForOutput(command,
+                    START_ACTIVITY_COMMAND_RESULT_PREFIX + "0");
+            lastResult = result.result;
+            if (!result.result.isSuccessful()) {
+                disconnectInternal(false);
+                transition(State.FAILED, null, 0, config.retryCount + 1);
+            }
+            return result;
+        }
+    }
+
+    static final class CommandResult {
+        final Result result;
+        final String output;
+
+        CommandResult(Result result, String output) {
+            this.result = result;
+            this.output = output == null ? "" : output;
+        }
+    }
+
     static boolean isValidPackageName(String packageName) {
         return packageName != null
                 && packageName.matches("[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+");
+    }
+
+    static boolean isValidComponentName(String componentName) {
+        if (componentName == null || !componentName.matches(
+                "[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+/[A-Za-z0-9_.$]+")) {
+            return false;
+        }
+        int separator = componentName.indexOf('/');
+        return isValidPackageName(componentName.substring(0, separator));
     }
 
     private Result ensureConnected(StateListener listener) {
@@ -520,6 +575,32 @@ public final class AdbConnectionManager implements AutoCloseable {
                     "ADB shell reported that the command failed");
         } catch (OperationException e) {
             return e.result;
+        }
+    }
+
+    private CommandResult executeCommandForOutput(final String command,
+                                                  final String expectedMarker) {
+        final Session session;
+        synchronized (lock) {
+            session = activeSession;
+        }
+        if (session == null) {
+            return new CommandResult(Result.failure(Error.CONNECTION_FAILED,
+                    "ADB is not connected"), "");
+        }
+        try {
+            String output = runWithTimeout(new Callable<String>() {
+                @Override
+                public String call() throws Exception {
+                    return session.executeForOutput(command, expectedMarker);
+                }
+            }, config.commandTimeoutMs, Error.COMMAND_TIMEOUT);
+            return new CommandResult(output.contains(expectedMarker)
+                    ? Result.success()
+                    : Result.failure(Error.COMMAND_FAILED,
+                    "ADB shell reported that the command failed"), output);
+        } catch (OperationException e) {
+            return new CommandResult(e.result, "");
         }
     }
 
@@ -712,6 +793,12 @@ public final class AdbConnectionManager implements AutoCloseable {
         @Override
         public boolean execute(String command, String expectedMarker)
                 throws IOException, InterruptedException {
+            return executeForOutput(command, expectedMarker).contains(expectedMarker);
+        }
+
+        @Override
+        public String executeForOutput(String command, String expectedMarker)
+                throws IOException, InterruptedException {
             AdbStream stream = null;
             try {
                 stream = connection.open("shell:" + command);
@@ -725,12 +812,10 @@ public final class AdbConnectionManager implements AutoCloseable {
                     }
                     if (bytes != null) {
                         output.append(new String(bytes, StandardCharsets.UTF_8));
-                        if (output.indexOf(expectedMarker) >= 0) {
-                            return true;
-                        }
+                        if (output.indexOf(expectedMarker) >= 0) break;
                     }
                 }
-                return output.indexOf(expectedMarker) >= 0;
+                return output.toString();
             } finally {
                 closeQuietly(stream);
             }

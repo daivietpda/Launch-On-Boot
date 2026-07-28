@@ -47,7 +47,7 @@ public final class PostLaunchActionScheduler {
     private final Object lock = new Object();
     private final Context context;
     private final SharedPreferences preferences;
-    private final TargetAppLauncher targetAppLauncher;
+    private final TargetAppLaunchCoordinator targetAppLaunchCoordinator;
     private final ScheduledExecutorService scheduler;
     private final ActionTriggerGate triggerGate;
 
@@ -71,7 +71,7 @@ public final class PostLaunchActionScheduler {
     private PostLaunchActionScheduler(Context context) {
         this.context = context;
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        targetAppLauncher = new TargetAppLauncher(context);
+        targetAppLaunchCoordinator = new TargetAppLaunchCoordinator(context);
         scheduler = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
             @Override
             public Thread newThread(Runnable runnable) {
@@ -204,7 +204,13 @@ public final class PostLaunchActionScheduler {
             finish(runGeneration, false);
             return;
         }
-        if (!targetAppLauncher.launch(plan.target)) {
+        TargetAppLauncher.LaunchResult launchResult = targetAppLaunchCoordinator.launch(plan.target,
+                plan.launchMethod, plan.advancedEnabled && "ADB".equalsIgnoreCase(plan.injectionMethod)
+                        || plan.restartTargetOnWake);
+        if (!launchResult.isConfirmed()) {
+            Log.w(TAG, "Target launch was not confirmed: " + launchResult.status + " "
+                    + launchResult.message);
+            TargetLaunchNotification.show(context, plan.target);
             finish(runGeneration, false);
             return;
         }
@@ -431,6 +437,8 @@ public final class PostLaunchActionScheduler {
         return new Plan(trigger, legacyEnabled, advancedEnabled, triggerEnabled, target,
                 actions, launchDelay, postDelay, defaultDelay, debounce,
                 restartTargetOnWake,
+                parseLaunchMethod(readString(SettingsManagerConstants.TARGET_APP_LAUNCH_METHOD,
+                        ActionSequenceStore.DEFAULT_TARGET_APP_LAUNCH_METHOD)),
                 readString(SettingsManagerConstants.KEY_INJECTION_METHOD,
                         ActionSequenceStore.DEFAULT_KEY_INJECTION_METHOD));
     }
@@ -471,6 +479,14 @@ public final class PostLaunchActionScheduler {
         return value;
     }
 
+    private static TargetAppLauncher.Method parseLaunchMethod(String value) {
+        try {
+            return TargetAppLauncher.Method.valueOf(value.trim().toUpperCase(java.util.Locale.US));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return TargetAppLauncher.Method.AUTO;
+        }
+    }
+
     private static final class Plan {
         final Trigger trigger;
         final boolean legacyEnabled;
@@ -483,12 +499,14 @@ public final class PostLaunchActionScheduler {
         final long defaultActionDelayMs;
         final long debounceMs;
         final boolean restartTargetOnWake;
+        final TargetAppLauncher.Method launchMethod;
         final String injectionMethod;
 
         Plan(Trigger trigger, boolean legacyEnabled, boolean advancedEnabled,
              boolean triggerEnabled, TargetAppLauncher.Target target,
              List<ActionItem> actions, long appLaunchDelayMs, long postLaunchDelayMs,
              long defaultActionDelayMs, long debounceMs, boolean restartTargetOnWake,
+             TargetAppLauncher.Method launchMethod,
              String injectionMethod) {
             this.trigger = trigger;
             this.legacyEnabled = legacyEnabled;
@@ -501,6 +519,7 @@ public final class PostLaunchActionScheduler {
             this.defaultActionDelayMs = defaultActionDelayMs;
             this.debounceMs = debounceMs;
             this.restartTargetOnWake = restartTargetOnWake;
+            this.launchMethod = launchMethod;
             this.injectionMethod = injectionMethod;
         }
     }

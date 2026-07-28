@@ -28,6 +28,7 @@ public final class ActionSequenceStore {
                     + "{\"type\":\"KEY\",\"keyCode\":\"KEYCODE_1\","
                     + "\"delayAfterMs\":300,\"repeat\":1}]";
     public static final String DEFAULT_KEY_INJECTION_METHOD = "NONE";
+    public static final String DEFAULT_TARGET_APP_LAUNCH_METHOD = "AUTO";
     public static final String DEFAULT_ADB_HOST = "127.0.0.1";
     public static final int DEFAULT_ADB_PORT = 5555;
     public static final int DEFAULT_ADB_RETRY_COUNT = 3;
@@ -126,6 +127,8 @@ public final class ActionSequenceStore {
                 DEFAULT_ACTION_DELAY_MS);
         settingsManager.setString(SettingsManagerConstants.KEY_INJECTION_METHOD,
                 DEFAULT_KEY_INJECTION_METHOD);
+        settingsManager.setString(SettingsManagerConstants.TARGET_APP_LAUNCH_METHOD,
+                DEFAULT_TARGET_APP_LAUNCH_METHOD);
         settingsManager.setString(SettingsManagerConstants.ADB_HOST, DEFAULT_ADB_HOST);
         settingsManager.setInt(SettingsManagerConstants.ADB_PORT, DEFAULT_ADB_PORT);
         settingsManager.setInt(SettingsManagerConstants.ADB_RETRY_COUNT, DEFAULT_ADB_RETRY_COUNT);
