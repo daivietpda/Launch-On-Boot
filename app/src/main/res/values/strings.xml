@@ -23,7 +23,10 @@
     <string name="advanced_settings_title">Advanced actions</string>
     <string name="adb_host_label">ADB host (localhost only)</string>
     <string name="adb_port_label">ADB port</string>
-    <string name="adb_setup_help">Enable Developer options and USB debugging/ADB debugging on the Android TV. Confirm the RSA authorization dialog when prompted. Android 11+ Wireless debugging can use a dynamic port and may require pairing; localhost port 5555 only works on firmware that exposes ADB TCP there.</string>
+    <string name="adb_setup_title">ADB connection setup</string>
+    <string name="adb_setup_steps">If Developer options are hidden, open About and press Build seven times. Then open Developer options, enable USB debugging or ADB debugging, and confirm the RSA dialog when prompted. On Android 11+, Wireless debugging can use a dynamic port and may require pairing. Localhost port 5555 works only when the firmware exposes ADB TCP there.</string>
+    <string name="button_open_developer_options">Open Developer options</string>
+    <string name="developer_options_unavailable">Developer options cannot be opened on this device. Open Settings manually.</string>
     <string name="button_test_adb_connection">Test ADB connection</string>
     <string name="button_run_action_sequence">Run the full action sequence</string>
     <string name="button_stop_action_sequence">Stop</string>

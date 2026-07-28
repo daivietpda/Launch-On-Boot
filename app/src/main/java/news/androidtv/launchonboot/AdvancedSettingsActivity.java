@@ -68,6 +68,10 @@ public final class AdvancedSettingsActivity extends AppCompatActivity {
         findViewById(R.id.button_test_target_launch).setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { testTargetLaunch(); }
         });
+        findViewById(R.id.button_open_developer_options).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override public void onClick(View v) { openDeveloperOptions(); }
+                });
         findViewById(R.id.button_request_home_role).setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { requestHomeRole(); }
         });
@@ -205,6 +209,18 @@ public final class AdvancedSettingsActivity extends AppCompatActivity {
         try { startActivity(new Intent(Settings.ACTION_HOME_SETTINGS)); }
         catch (android.content.ActivityNotFoundException e) {
             statusView.setText(R.string.home_settings_unavailable);
+        }
+    }
+
+    private void openDeveloperOptions() {
+        try {
+            startActivity(new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
+        } catch (android.content.ActivityNotFoundException e) {
+            try {
+                startActivity(new Intent(Settings.ACTION_SETTINGS));
+            } catch (android.content.ActivityNotFoundException ignored) {
+                statusView.setText(R.string.developer_options_unavailable);
+            }
         }
     }
 

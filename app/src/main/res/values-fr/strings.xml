@@ -23,7 +23,10 @@
      <string name="advanced_settings_title">Actions avancées</string>
      <string name="adb_host_label">Hôte ADB (localhost uniquement)</string>
      <string name="adb_port_label">Port ADB</string>
-     <string name="adb_setup_help">Activez les options pour les développeurs et le débogage USB/ADB sur Android TV. Confirmez la boîte de dialogue d\'autorisation RSA. Sur Android 11+, le débogage sans fil peut utiliser un port dynamique et nécessiter un appairage ; le port localhost 5555 fonctionne uniquement si le firmware y expose ADB TCP.</string>
+     <string name="adb_setup_title">Configuration de la connexion ADB</string>
+     <string name="adb_setup_steps">Si les options développeur sont masquées, ouvrez À propos et appuyez sept fois sur Numéro de build. Activez ensuite le débogage USB ou ADB et confirmez la boîte de dialogue RSA. Sur Android 11+, le débogage sans fil peut utiliser un port dynamique et nécessiter un appairage.</string>
+     <string name="button_open_developer_options">Ouvrir les options pour les développeurs</string>
+     <string name="developer_options_unavailable">Les options pour les développeurs ne peuvent pas être ouvertes sur cet appareil. Ouvrez les réglages manuellement.</string>
      <string name="button_test_adb_connection">Tester la connexion ADB</string>
      <string name="button_run_action_sequence">Tester toute la séquence</string>
      <string name="button_stop_action_sequence">Arrêter</string>

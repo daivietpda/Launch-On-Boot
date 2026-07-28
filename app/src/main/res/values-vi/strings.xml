@@ -23,7 +23,10 @@
     <string name="advanced_settings_title">Hành động nâng cao</string>
     <string name="adb_host_label">Máy chủ ADB (chỉ localhost)</string>
     <string name="adb_port_label">Cổng ADB</string>
-    <string name="adb_setup_help">Bật Tùy chọn nhà phát triển và gỡ lỗi USB/ADB trên Android TV. Xác nhận hộp thoại cấp quyền RSA khi xuất hiện. Trên Android 11+, Gỡ lỗi không dây có thể sử dụng cổng động và yêu cầu ghép đôi; localhost cổng 5555 chỉ hoạt động trên firmware có mở ADB TCP tại cổng này.</string>
+    <string name="adb_setup_title">Thiết lập kết nối ADB</string>
+    <string name="adb_setup_steps">Nếu chưa thấy Tùy chọn nhà phát triển, mở Giới thiệu và bấm Bản dựng 7 lần. Sau đó mở Tùy chọn nhà phát triển, bật Gỡ lỗi USB hoặc Gỡ lỗi ADB và xác nhận hộp thoại RSA. Trên Android 11+, Gỡ lỗi không dây có thể dùng cổng động và cần ghép đôi. Localhost cổng 5555 chỉ hoạt động khi firmware có mở ADB TCP tại cổng này.</string>
+    <string name="button_open_developer_options">Mở Tùy chọn nhà phát triển</string>
+    <string name="developer_options_unavailable">Không thể mở Tùy chọn nhà phát triển trên thiết bị này. Hãy mở Cài đặt thủ công.</string>
     <string name="button_test_adb_connection">Kiểm tra kết nối ADB</string>
     <string name="button_run_action_sequence">Chạy thử toàn bộ chuỗi</string>
     <string name="button_stop_action_sequence">Dừng</string>
