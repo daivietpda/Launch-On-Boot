@@ -125,7 +125,7 @@ public final class DreamListenerService extends Service {
                 .setContentTitle(getText(R.string.app_name))
                 .setContentText(getText(R.string.notification_text))
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.banner))
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.app_banner))
                 .setContentIntent(pendingIntent)
                 .setCategory(Notification.CATEGORY_SERVICE)
                 .setPriority(Notification.PRIORITY_MIN)
