@@ -31,6 +31,7 @@ import java.util.concurrent.TimeoutException;
 public final class AdbConnectionManager implements AutoCloseable {
     static final String KEY_COMMAND_RESULT_PREFIX = "__LOB_KEY_EXIT__";
     static final String TEXT_COMMAND_RESULT_PREFIX = "__LOB_TEXT_EXIT__";
+    static final String FORCE_STOP_COMMAND_RESULT_PREFIX = "__LOB_FORCE_STOP_EXIT__";
     private static final String SHELL_PROBE_MARKER = "__LOB_SHELL_OK__";
     private static final int MAX_SHELL_OUTPUT_BYTES = 4096;
 
@@ -392,6 +393,43 @@ public final class AdbConnectionManager implements AutoCloseable {
             }
             return result;
         }
+    }
+
+    /**
+     * Stops one validated application package. This deliberately accepts a
+     * package name rather than an arbitrary shell command, so preferences
+     * cannot turn the ADB channel into a general command executor.
+     */
+    Result forceStopPackage(String packageName) {
+        synchronized (operationLock) {
+            if (!isValidPackageName(packageName)) {
+                Result result = Result.failure(Error.INVALID_CONFIGURATION,
+                        "The target package name is invalid");
+                lastResult = result;
+                return result;
+            }
+
+            Result connectionResult = ensureConnected(null);
+            if (!connectionResult.isSuccessful()) {
+                lastResult = connectionResult;
+                return connectionResult;
+            }
+
+            String command = "am force-stop --user 0 " + packageName
+                    + "; echo " + FORCE_STOP_COMMAND_RESULT_PREFIX + "$?";
+            Result result = executeCommand(command, FORCE_STOP_COMMAND_RESULT_PREFIX + "0");
+            lastResult = result;
+            if (!result.isSuccessful()) {
+                disconnectInternal(false);
+                transition(State.FAILED, null, 0, config.retryCount + 1);
+            }
+            return result;
+        }
+    }
+
+    static boolean isValidPackageName(String packageName) {
+        return packageName != null
+                && packageName.matches("[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+");
     }
 
     private Result ensureConnected(StateListener listener) {

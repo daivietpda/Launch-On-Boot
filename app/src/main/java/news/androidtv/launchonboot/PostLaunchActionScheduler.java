@@ -135,7 +135,7 @@ public final class PostLaunchActionScheduler {
             pendingTask = scheduler.schedule(new Runnable() {
                 @Override
                 public void run() {
-                    launchTarget(runGeneration, plan);
+                    restartTargetIfNeededThenLaunch(runGeneration, plan);
                 }
             }, plan.appLaunchDelayMs, TimeUnit.MILLISECONDS);
         }
@@ -143,6 +143,60 @@ public final class PostLaunchActionScheduler {
         return plan.advancedEnabled
                 ? ScheduleResult.SCHEDULED_ADVANCED
                 : ScheduleResult.SCHEDULED_LAUNCH_ONLY;
+    }
+
+    /**
+     * A resumed media app can retain playback and focus after sleep.  On an
+     * opted-in wake flow, stop its selected package first, wait briefly for the
+     * task to disappear, then launch it as a fresh task.  Failure is terminal:
+     * actions must never be sent to the old resumed session.
+     */
+    private void restartTargetIfNeededThenLaunch(final long runGeneration, final Plan plan) {
+        if (!plan.restartTargetOnWake) {
+            launchTarget(runGeneration, plan);
+            return;
+        }
+        if (!isCurrent(runGeneration) || !isStillEnabled(plan)) {
+            finish(runGeneration, false);
+            return;
+        }
+
+        AdbConnectionManager manager = null;
+        try {
+            manager = new AdbConnectionManager(context);
+            AdbConnectionManager.Result result = manager.forceStopPackage(plan.target.packageName);
+            if (!result.isSuccessful()) {
+                Log.w(TAG, "Could not restart the configured target before wake actions: "
+                        + result.getError());
+                finish(runGeneration, false);
+                return;
+            }
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Invalid ADB or target configuration for wake restart");
+            finish(runGeneration, false);
+            return;
+        } finally {
+            if (manager != null) {
+                manager.close();
+            }
+        }
+
+        if (!isCurrent(runGeneration) || !isStillEnabled(plan)) {
+            finish(runGeneration, false);
+            return;
+        }
+        synchronized (lock) {
+            if (generation != runGeneration) {
+                return;
+            }
+            pendingTask = scheduler.schedule(new Runnable() {
+                @Override
+                public void run() {
+                    launchTarget(runGeneration, plan);
+                }
+            }, ActionSequenceStore.DEFAULT_WAKE_TARGET_RESTART_DELAY_MS,
+                    TimeUnit.MILLISECONDS);
+        }
     }
 
     private void launchTarget(long runGeneration, Plan plan) {
@@ -346,6 +400,15 @@ public final class PostLaunchActionScheduler {
         TargetAppLauncher.Target target =
                 liveChannels || !packageName.trim().isEmpty()
                         ? new TargetAppLauncher.Target(liveChannels, packageName) : null;
+        boolean restartTargetOnWake = trigger != Trigger.BOOT
+                && advancedEnabled
+                && readBoolean(SettingsManagerConstants.RESTART_TARGET_ON_WAKE,
+                ActionSequenceStore.DEFAULT_RESTART_TARGET_ON_WAKE);
+        if (restartTargetOnWake && (target == null
+                || !AdbConnectionManager.isValidPackageName(target.packageName))) {
+            throw new IllegalArgumentException(
+                    "Restart after wake requires a selected application package");
+        }
         List<ActionItem> actions = advancedEnabled
                 ? new ActionSequenceStore(context).getActionSequence()
                 : java.util.Collections.<ActionItem>emptyList();
@@ -367,6 +430,7 @@ public final class PostLaunchActionScheduler {
                 "ACTION_DEBOUNCE_MS");
         return new Plan(trigger, legacyEnabled, advancedEnabled, triggerEnabled, target,
                 actions, launchDelay, postDelay, defaultDelay, debounce,
+                restartTargetOnWake,
                 readString(SettingsManagerConstants.KEY_INJECTION_METHOD,
                         ActionSequenceStore.DEFAULT_KEY_INJECTION_METHOD));
     }
@@ -418,12 +482,14 @@ public final class PostLaunchActionScheduler {
         final long postLaunchDelayMs;
         final long defaultActionDelayMs;
         final long debounceMs;
+        final boolean restartTargetOnWake;
         final String injectionMethod;
 
         Plan(Trigger trigger, boolean legacyEnabled, boolean advancedEnabled,
              boolean triggerEnabled, TargetAppLauncher.Target target,
              List<ActionItem> actions, long appLaunchDelayMs, long postLaunchDelayMs,
-             long defaultActionDelayMs, long debounceMs, String injectionMethod) {
+             long defaultActionDelayMs, long debounceMs, boolean restartTargetOnWake,
+             String injectionMethod) {
             this.trigger = trigger;
             this.legacyEnabled = legacyEnabled;
             this.advancedEnabled = advancedEnabled;
@@ -434,6 +500,7 @@ public final class PostLaunchActionScheduler {
             this.postLaunchDelayMs = postLaunchDelayMs;
             this.defaultActionDelayMs = defaultActionDelayMs;
             this.debounceMs = debounceMs;
+            this.restartTargetOnWake = restartTargetOnWake;
             this.injectionMethod = injectionMethod;
         }
     }

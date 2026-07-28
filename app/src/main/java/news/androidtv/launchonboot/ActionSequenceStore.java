@@ -16,7 +16,10 @@ public final class ActionSequenceStore {
     public static final boolean DEFAULT_ADVANCED_ACTIONS_ENABLED = false;
     public static final boolean DEFAULT_ACTION_TRIGGER_BOOT = true;
     public static final boolean DEFAULT_ACTION_TRIGGER_WAKE = true;
+    public static final boolean DEFAULT_RESTART_TARGET_ON_WAKE = false;
     public static final long DEFAULT_APP_LAUNCH_DELAY_MS = 5000L;
+    /** Lets Android finish removing the old task before the target is launched again. */
+    public static final long DEFAULT_WAKE_TARGET_RESTART_DELAY_MS = 750L;
     public static final long DEFAULT_POST_LAUNCH_DELAY_MS = 10_000L;
     public static final long DEFAULT_ACTION_DELAY_MS = 300L;
     /** Example shown by the advanced-settings editor before the user saves a sequence. */
@@ -113,6 +116,8 @@ public final class ActionSequenceStore {
                 DEFAULT_ACTION_TRIGGER_BOOT);
         settingsManager.setBoolean(SettingsManagerConstants.ACTION_TRIGGER_WAKE,
                 DEFAULT_ACTION_TRIGGER_WAKE);
+        settingsManager.setBoolean(SettingsManagerConstants.RESTART_TARGET_ON_WAKE,
+                DEFAULT_RESTART_TARGET_ON_WAKE);
         settingsManager.setLong(SettingsManagerConstants.APP_LAUNCH_DELAY_MS,
                 DEFAULT_APP_LAUNCH_DELAY_MS);
         settingsManager.setLong(SettingsManagerConstants.POST_LAUNCH_DELAY_MS,

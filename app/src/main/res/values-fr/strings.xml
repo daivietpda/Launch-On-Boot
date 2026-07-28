@@ -40,6 +40,8 @@
      <string name="advanced_actions_enabled">Activer les actions après lancement</string>
      <string name="advanced_trigger_boot">Exécuter après le démarrage</string>
      <string name="advanced_trigger_wake">Exécuter après le réveil</string>
+     <string name="restart_target_on_wake">Redémarrer l’application cible avant les actions au réveil</string>
+     <string name="restart_target_on_wake_help">ADB est requis. L’application sélectionnée est d’abord arrêtée ; la vidéo en cours peut être interrompue.</string>
      <string name="app_launch_delay_label">Délai avant le lancement de l\'application (ms)</string>
      <string name="post_launch_delay_label">Délai après le lancement de l\'application (ms)</string>
      <string name="default_action_delay_label">Délai par défaut entre les touches (ms)</string>

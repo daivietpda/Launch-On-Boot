@@ -18,6 +18,11 @@ public class SettingsManagerConstants {
             "ADVANCED_ACTIONS_DEMO_INITIALIZED";
     public static final String ACTION_TRIGGER_BOOT = "ACTION_TRIGGER_BOOT";
     public static final String ACTION_TRIGGER_WAKE = "ACTION_TRIGGER_WAKE";
+    /**
+     * When enabled, a wake trigger stops the selected package through the
+     * localhost ADB connection before it is launched again.
+     */
+    public static final String RESTART_TARGET_ON_WAKE = "RESTART_TARGET_ON_WAKE";
     public static final String APP_LAUNCH_DELAY_MS = "APP_LAUNCH_DELAY_MS";
     public static final String POST_LAUNCH_DELAY_MS = "POST_LAUNCH_DELAY_MS";
     public static final String DEFAULT_ACTION_DELAY_MS = "DEFAULT_ACTION_DELAY_MS";

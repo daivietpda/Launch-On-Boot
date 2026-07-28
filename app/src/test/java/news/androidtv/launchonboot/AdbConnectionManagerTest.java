@@ -258,6 +258,55 @@ public class AdbConnectionManagerTest {
         assertEquals(0, attempts.get());
     }
 
+    @Test
+    public void forceStopPackage_usesOnlyValidatedPackageAfterShellProbe() {
+        List<String> commands = new ArrayList<>();
+        manager = new AdbConnectionManager(
+                config("127.0.0.1", 0, 0, 100, 100),
+                (settings, connected) -> {
+                    connected.run();
+                    return new AdbConnectionManager.Session() {
+                        @Override
+                        public boolean execute(String command, String marker) {
+                            commands.add(command);
+                            return true;
+                        }
+
+                        @Override
+                        public void close() {
+                        }
+                    };
+                },
+                durationMs -> { });
+
+        AdbConnectionManager.Result result = manager.forceStopPackage("com.example.tv");
+
+        assertTrue(result.isSuccessful());
+        assertEquals(Arrays.asList(
+                "echo __LOB_SHELL_OK__",
+                "am force-stop --user 0 com.example.tv; echo __LOB_FORCE_STOP_EXIT__$?"),
+                commands);
+    }
+
+    @Test
+    public void forceStopPackage_rejectsMalformedPackageBeforeConnecting() {
+        AtomicInteger attempts = new AtomicInteger();
+        manager = new AdbConnectionManager(
+                config("127.0.0.1", 0, 0, 100, 100),
+                (settings, connected) -> {
+                    attempts.incrementAndGet();
+                    return successfulSession();
+                },
+                durationMs -> { });
+
+        AdbConnectionManager.Result result =
+                manager.forceStopPackage("com.example.tv; input keyevent HOME");
+
+        assertFalse(result.isSuccessful());
+        assertEquals(AdbConnectionManager.Error.INVALID_CONFIGURATION, result.getError());
+        assertEquals(0, attempts.get());
+    }
+
     private static AdbConnectionManager.Config config(
             String host, int retryCount, long retryDelayMs,
             long connectionTimeoutMs, long commandTimeoutMs) {

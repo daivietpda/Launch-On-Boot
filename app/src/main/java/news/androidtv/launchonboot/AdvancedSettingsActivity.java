@@ -17,7 +17,7 @@ import java.util.List;
 /** General Advanced Actions configuration. Sequence editing lives in its own Activity. */
 public final class AdvancedSettingsActivity extends AppCompatActivity {
     private EditText hostView, portView, appLaunchDelayView, postLaunchDelayView, defaultActionDelayView;
-    private CheckBox advancedEnabledView, triggerBootView, triggerWakeView;
+    private CheckBox advancedEnabledView, triggerBootView, triggerWakeView, restartTargetOnWakeView;
     private TextView statusView, sequenceSummaryView;
     private AdbConnectionTestController connectionTestController;
 
@@ -31,6 +31,7 @@ public final class AdvancedSettingsActivity extends AppCompatActivity {
         advancedEnabledView = findViewById(R.id.check_advanced_enabled);
         triggerBootView = findViewById(R.id.check_trigger_boot);
         triggerWakeView = findViewById(R.id.check_trigger_wake);
+        restartTargetOnWakeView = findViewById(R.id.check_restart_target_on_wake);
         statusView = findViewById(R.id.text_adb_status);
         sequenceSummaryView = findViewById(R.id.text_action_sequence_summary);
         loadConfiguration();
@@ -64,6 +65,9 @@ public final class AdvancedSettingsActivity extends AppCompatActivity {
         advancedEnabledView.setChecked(booleanValue(p, SettingsManagerConstants.ADVANCED_ACTIONS_ENABLED, false));
         triggerBootView.setChecked(booleanValue(p, SettingsManagerConstants.ACTION_TRIGGER_BOOT, true));
         triggerWakeView.setChecked(booleanValue(p, SettingsManagerConstants.ACTION_TRIGGER_WAKE, true));
+        restartTargetOnWakeView.setChecked(booleanValue(p,
+                SettingsManagerConstants.RESTART_TARGET_ON_WAKE,
+                ActionSequenceStore.DEFAULT_RESTART_TARGET_ON_WAKE));
     }
 
     private boolean saveConfiguration() {
@@ -80,6 +84,8 @@ public final class AdvancedSettingsActivity extends AppCompatActivity {
                     .putBoolean(SettingsManagerConstants.ADVANCED_ACTIONS_ENABLED, advancedEnabledView.isChecked())
                     .putBoolean(SettingsManagerConstants.ACTION_TRIGGER_BOOT, triggerBootView.isChecked())
                     .putBoolean(SettingsManagerConstants.ACTION_TRIGGER_WAKE, triggerWakeView.isChecked())
+                    .putBoolean(SettingsManagerConstants.RESTART_TARGET_ON_WAKE,
+                            restartTargetOnWakeView.isChecked())
                     .putString(SettingsManagerConstants.KEY_INJECTION_METHOD, "ADB").apply();
             PostLaunchActionScheduler.getInstance(this).cancel();
             DreamListenerService.updateRunningState(this);

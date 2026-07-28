@@ -40,6 +40,8 @@
     <string name="advanced_actions_enabled">Bật hành động sau khi mở ứng dụng</string>
     <string name="advanced_trigger_boot">Chạy sau khi khởi động</string>
     <string name="advanced_trigger_wake">Chạy sau khi thức dậy</string>
+    <string name="restart_target_on_wake">Khởi động lại ứng dụng đích trước khi chạy chuỗi sau khi thức dậy</string>
+    <string name="restart_target_on_wake_help">Cần ADB. Ứng dụng đích sẽ bị dừng trước, vì vậy video hiện tại có thể bị gián đoạn.</string>
     <string name="app_launch_delay_label">Độ trễ trước khi mở ứng dụng (ms)</string>
     <string name="post_launch_delay_label">Độ trễ sau khi mở ứng dụng (ms)</string>
     <string name="default_action_delay_label">Độ trễ mặc định giữa các phím (ms)</string>

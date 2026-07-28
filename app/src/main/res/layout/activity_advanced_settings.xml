@@ -17,6 +17,10 @@
             android:layout_height="wrap_content" android:text="@string/advanced_trigger_boot" />
         <CheckBox android:id="@+id/check_trigger_wake" android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:text="@string/advanced_trigger_wake" />
+        <CheckBox android:id="@+id/check_restart_target_on_wake" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:text="@string/restart_target_on_wake" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/restart_target_on_wake_help" />
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_marginTop="12dp" android:text="@string/app_launch_delay_label" />
         <EditText android:id="@+id/edit_app_launch_delay" android:layout_width="match_parent"

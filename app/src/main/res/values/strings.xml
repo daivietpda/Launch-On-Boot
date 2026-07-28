@@ -40,6 +40,8 @@
     <string name="advanced_actions_enabled">Enable post-launch actions</string>
     <string name="advanced_trigger_boot">Run after boot</string>
     <string name="advanced_trigger_wake">Run after wake</string>
+    <string name="restart_target_on_wake">Restart target app before actions after wake</string>
+    <string name="restart_target_on_wake_help">Requires ADB. The selected app is stopped first, so its current video may be interrupted.</string>
     <string name="app_launch_delay_label">Delay before launching app (ms)</string>
     <string name="post_launch_delay_label">Delay after launching app (ms)</string>
     <string name="default_action_delay_label">Default delay between keys (ms)</string>
