@@ -1,6 +1,6 @@
 <resources>
      <string name="app_name">Launch on Boot</string>
-     <string name="credits">Cette application permet aux utilisateurs de configurer une application spécifique à lancer chaque fois que l\'appareil est redémarré.\n\nCréé par l\'Interactive Tv Lab.\nOpen source sur GitHub.</string>
+     <string name="credits">Ouvrez automatiquement l\'application TV choisie après le démarrage ou la sortie de veille.\n\nLes actions avancées peuvent attendre le chargement, naviguer avec la télécommande, saisir un numéro de chaîne et appuyer sur OK. Cette fonction convient aux personnes âgées et aux projets TV ou kiosque automatisés.</string>
      <string name="null_intent">Impossible de trouver l\'activité à lancer</string>
      <string name="onboarding_title_welcome">Bienvenue dans \"Launch on Boot\"</string>
      <string name="onboarding_description_welcome">Ce petit guide vous aidera à démarrer.</string>

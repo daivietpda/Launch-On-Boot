@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Khởi chạy khi Khởi động</string>
-    <string name="credits">Ứng dụng này cho phép người dùng cấu hình một ứng dụng cụ thể để khởi chạy bất cứ khi nào thiết bị được khởi động lại.\n\nĐược tạo bởi Interactive Tv Lab.\nMã nguồn mở trên GitHub.</string>
+    <string name="credits">Tự động mở ứng dụng TV đã chọn sau khi thiết bị khởi động hoặc thức dậy.\n\nHành động nâng cao có thể chờ ứng dụng tải xong, điều hướng bằng remote, nhập số kênh và bấm OK. Tính năng này phù hợp cho người lớn tuổi và các dự án TV hoặc kiosk tự động.</string>
     <string name="null_intent">Không tìm thấy hoạt động để khởi chạy</string>
     <string name="onboarding_title_welcome">Chào mừng bạn đến với \"Khởi chạy khi Khởi động\"</string>
     <string name="onboarding_description_welcome">Hướng dẫn ngắn này sẽ giúp bạn bắt đầu.</string>

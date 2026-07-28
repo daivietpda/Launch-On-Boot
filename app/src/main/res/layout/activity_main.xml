@@ -8,25 +8,27 @@
     tools:context="news.androidtv.launchonboot.MainActivity">
 
     <RelativeLayout
-        android:layout_width="300dp"
+        android:layout_width="340dp"
         android:visibility="visible"
         android:paddingTop="32dp"
         android:paddingBottom="32dp"
         android:id="@+id/leftPane"
         android:layout_height="match_parent">
         <ImageView
-            android:layout_width="400dp"
-            android:foregroundGravity="center_horizontal"
-            android:src="@drawable/app_banner"
-            android:id="@+id/app_banner"
-            android:layout_height="wrap_content" />
+            android:layout_width="320dp"
+            android:layout_height="180dp"
+            android:layout_centerHorizontal="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/main_screen_banner"
+            android:id="@+id/app_banner" />
         <TextView
             android:layout_width="match_parent"
             android:layout_below="@id/app_banner"
             android:textSize="16sp"
-            android:paddingEnd="32dp"
-            android:paddingStart="32dp"
-            android:paddingTop="8dp"
+            android:lineSpacingExtra="3dp"
+            android:paddingEnd="24dp"
+            android:paddingStart="24dp"
+            android:paddingTop="16dp"
             android:text="@string/credits"
             android:id="@+id/text_credits"
             android:layout_height="wrap_content" />
