@@ -38,6 +38,8 @@ public final class AdbConnectionManager implements AutoCloseable {
 
     public static final long DEFAULT_CONNECTION_TIMEOUT_MS = 15_000L;
     public static final long DEFAULT_COMMAND_TIMEOUT_MS = 5_000L;
+    /** `am start -W` waits for a slow TV activity to report launch completion. */
+    public static final long DEFAULT_TARGET_LAUNCH_TIMEOUT_MS = 30_000L;
     public static final int MAX_RETRY_COUNT = 10;
     public static final long MAX_RETRY_DELAY_MS = 60_000L;
     public static final long MAX_TIMEOUT_MS = 120_000L;
@@ -453,7 +455,8 @@ public final class AdbConnectionManager implements AutoCloseable {
                     + category + " -n " + componentName + "; echo "
                     + START_ACTIVITY_COMMAND_RESULT_PREFIX + "$?";
             CommandResult result = executeCommandForOutput(command,
-                    START_ACTIVITY_COMMAND_RESULT_PREFIX + "0");
+                    START_ACTIVITY_COMMAND_RESULT_PREFIX + "0",
+                    Math.max(config.commandTimeoutMs, DEFAULT_TARGET_LAUNCH_TIMEOUT_MS));
             lastResult = result.result;
             if (!result.result.isSuccessful()) {
                 disconnectInternal(false);
@@ -579,7 +582,8 @@ public final class AdbConnectionManager implements AutoCloseable {
     }
 
     private CommandResult executeCommandForOutput(final String command,
-                                                  final String expectedMarker) {
+                                                  final String expectedMarker,
+                                                  final long timeoutMs) {
         final Session session;
         synchronized (lock) {
             session = activeSession;
@@ -594,7 +598,7 @@ public final class AdbConnectionManager implements AutoCloseable {
                 public String call() throws Exception {
                     return session.executeForOutput(command, expectedMarker);
                 }
-            }, config.commandTimeoutMs, Error.COMMAND_TIMEOUT);
+            }, timeoutMs, Error.COMMAND_TIMEOUT);
             return new CommandResult(output.contains(expectedMarker)
                     ? Result.success()
                     : Result.failure(Error.COMMAND_FAILED,

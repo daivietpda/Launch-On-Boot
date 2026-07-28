@@ -16,8 +16,8 @@ android {
         applicationId "news.androidtv.launchonboot"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 144
-        versionName "1.4.4"
+        versionCode 145
+        versionName "1.4.5"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
