@@ -373,7 +373,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void requestOverlayPermissionForBackgroundLaunch() {
         if (overlayPermissionRequestAttempted
-                || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.M
+                // Background activity launch restrictions requiring this user-granted
+                // exemption start on Android 10. Opening this Settings page on Android 9
+                // interrupts the enable flow even though the permission is not needed.
+                || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q
                 || Settings.canDrawOverlays(this)) {
             return;
         }
